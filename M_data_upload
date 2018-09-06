@@ -1,0 +1,50 @@
+<?php
+
+if (!defined('BASEPATH')) exit('No direct script access allowed');
+
+class M_data_upload extends CI_Model {
+
+	function show($table){
+		$conn = $this->load->database('default',TRUE);
+  	$query = $conn->select()
+  					->from($table)
+  					->get();
+  		return $query->result_array();
+	}
+
+  function delete_batch ($id = array(), $cond = null, $bln = null, $tahun = null, $segmen = null, $table = null) {
+    $conn = $this->load->database('default',TRUE);
+    $query = $conn->select()
+                    ->from($table)
+            				->where(array('Bulan' => $bln, 'Tahun' => $tahun))
+            				->delete($table);
+                    
+    if ($query) {
+        return true;
+        
+    } else {
+        return false;
+    }
+  }
+
+function insert_query($select, $table, $data = array(),$jml_row){
+	$jml_perulangan=floor($jml_row/900);
+	$jml_mod=($jml_row%900);
+  
+	//insert 900 row (note: max insert sqlserver 10000 row)
+    for ($i=0; $i < $jml_perulangan; $i++) { 
+		$conn       = $this->load->database('default',TRUE);  
+		$query_str  = "INSERT INTO ".$table." (".$select.") values ".implode(',',array_slice($data,($i*900),900,true))."" ;
+		$rs         = $conn->query($query_str);
+    }
+	
+	//insert sisa
+	if($jml_mod >=1){
+	$lastRow=($i*900);
+		$conn       = $this->load->database('default',TRUE);  
+		$query_str  = "INSERT INTO ".$table." (".$select.") values ".implode(',',array_slice($data,$lastRow,$jml_mod,true))."" ;
+		$rs         = $conn->query($query_str);
+	}
+	return $rs;
+  }
+}
