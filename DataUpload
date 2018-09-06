@@ -70,4 +70,36 @@ class DataUpload extends CI_Controller {
 			return redirect('../DataUpload');
 		}
 	}
+	
+	function get_data()
+	{
+		$list = $this->M_data_upload->get_datatables();
+		$data = array();
+		$no = $_POST['start'];
+		foreach ($list as $field) {
+			$no++;
+			$row = array();
+			$row[] = $no;
+			$row[] = $field->Tahun;
+			$row[] = $field->Bulan;
+			$row[] = $field->Nama;
+			$row[] = $field->Subsekon_BI_Digit;
+			$row[] = $field->Subsekon_BI_Nama;
+			$row[] = $field->Kredit;
+			$row[] = $field->Npl;
+			$row[] = $field->Kanwil;
+			$row[] = $field->Kode;  
+
+			$data[] = $row;
+		}
+
+		$output = array(
+			"draw" => $_POST['draw'],
+			"recordsTotal" => $this->M_data_ojk->count_all(),
+			"recordsFiltered" => $this->M_data_ojk->count_filtered(),
+			"data" => $data,
+		);
+		//output dalam format JSON
+		echo json_encode($output);
+	}
 }
