@@ -61,7 +61,7 @@ class DataUpload extends CI_Controller {
 
 		$this->M_data_ojk->delete_batch($periode[0], $periode[1], "SRC_DATA_UPLOAD");
 
-		$hasil=$this->M_data_Upload->insert_query("Tahun, Bulan, Dati1, Dati2, Nama, Subsekon_bi_digit, Subsekon_bi_nama, Kredit, Npl, Kanwil, Kode", "SRC_DATA_OJK", $arrData);
+		$hasil=$this->M_data_Upload->insert_query("Tahun, Bulan, Dati1, Dati2, Nama, Subsekon_bi_digit, Subsekon_bi_nama, Kredit, Npl, Kanwil, Kode", "SRC_DATA_OJK", $arrData,$highestRow);
 				
 		$this->session->set_flashdata('message', 'Data Excel berhasil diupload.');
 			return redirect('../DataUpload');
