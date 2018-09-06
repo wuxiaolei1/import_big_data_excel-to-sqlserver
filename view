@@ -97,3 +97,31 @@
 		</div>
 	</div>
 </div>
+<script type="text/javascript">
+
+$(document).ready(function(){
+var myTable = 
+		$('#dynamic-table')
+		.DataTable( {
+			"processing": true, 
+            "serverSide": true, 
+			"bAutoWidth": false,
+            "order": [], 
+            
+            "ajax": {
+                "url": "<?php echo site_url('DataOjk/get_data')?>",
+                "type": "POST"
+            },
+
+            
+            "columnDefs": [
+            { 
+                "targets": [ 0 ], 
+                "orderable": false, 
+            },
+            ],
+
+	    } );
+});
+</script>
+
