@@ -1,0 +1,79 @@
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+include_once (dirname(__FILE__) . "/Main_dashboard.php");
+
+class DataOjk extends Main_dashboard {
+	function __construct()
+	{
+		parent::__construct();
+		$this->load->library('session');
+		$this->load->helper('form');
+		// $this->load->model('M_model_center');
+		$this->load->model('M_data_ojk');
+	}
+
+	public function index(){
+		// redirect('PasarSasaran/Menkor');
+		if(!empty($this->session->userdata('username'))){
+			$data					= $this->load_dashboard();
+			$data['content_url']	= 'data_ojk/index';
+			$data['css_plugin'] 	= 'data_ojk/css_index';
+			$data['js_plugin'] 		= 'data_ojk/js_index';
+			$data['upload_konten'] 	= $this->M_data_ojk->show("SRC_DATA_OJK");
+			// echo "<pre>";print_r(scandir("assets/uploads/src_pdf_file"));echo "</pre>";exit();
+			$this->load_template($data);
+		}else{
+			redirect('login');
+		}
+	}
+
+
+	public function uploadDataOjk(){
+		
+		$file 		= $_FILES["upload"]["tmp_name"];
+		$periode 	= explode("/", $_POST["periode"]); //DIVIDE PERIODE INTO MONTH AND YEAR
+
+		if ($file){
+		PHPExcel_Cell::setValueBinder( new PHPExcel_Cell_AdvancedValueBinder() );
+		$arrData 	= array();
+		$arrSektor 	= array();
+
+
+		$objPHPExcel	= PHPExcel_IOFactory::load($file);
+		$highestRow 	= $objPHPExcel->getActiveSheet()->getHighestRow();
+
+			for($i=2;$i<= $highestRow; $i++){
+				$tahun 				= $objPHPExcel->getActiveSheet()->getCell('A'.$i)->getValue();
+				$bulan 				= $objPHPExcel->getActiveSheet()->getCell('B'.$i)->getValue();
+				$dati1 				= ($objPHPExcel->getActiveSheet()->getCell('C'.$i)->getValue()==''?0:$objPHPExcel->getActiveSheet()->getCell('C'.$i)->getValue());	
+				$dati2 				= ($objPHPExcel->getActiveSheet()->getCell('D'.$i)->getValue()==''?0:$objPHPExcel->getActiveSheet()->getCell('D'.$i)->getValue());	
+				$nama 				= ($objPHPExcel->getActiveSheet()->getCell('E'.$i)->getValue()==''?NULL:$objPHPExcel->getActiveSheet()->getCell('E'.$i)->getValue());	
+				$subsekon_bi_digit 	= ($objPHPExcel->getActiveSheet()->getCell('F'.$i)->getValue()==''?NULL:$objPHPExcel->getActiveSheet()->getCell('F'.$i)->getValue());	
+				$subsekon_bi_nama 	= ($objPHPExcel->getActiveSheet()->getCell('G'.$i)->getValue()==''?NULL:$objPHPExcel->getActiveSheet()->getCell('G'.$i)->getValue());	
+				$kredit 			= ($objPHPExcel->getActiveSheet()->getCell('H'.$i)->getValue()==''?0:$objPHPExcel->getActiveSheet()->getCell('H'.$i)->getValue());	
+				$npl 				= ($objPHPExcel->getActiveSheet()->getCell('I'.$i)->getValue()==''?0:$objPHPExcel->getActiveSheet()->getCell('I'.$i)->getValue());	
+				$kanwil 			= $objPHPExcel->getActiveSheet()->getCell('J'.$i)->getValue();	
+				$kode444 			= $objPHPExcel->getActiveSheet()->getCell('K'.$i)->getValue();	
+				if(!empty($tahun) && !empty($bulan)){
+					
+				$col = "(".$tahun.", ".$bulan.", ".$dati1.", ".$dati2.", '".$nama."', '".$subsekon_bi_digit."','".$subsekon_bi_nama."',".$kredit.",".$npl.",'".$kanwil."',".$kode444.")";
+					array_push($arrData, $col);
+					array_push($arrSektor, $tahun);
+				}
+			}
+
+		$this->M_data_ojk->delete_batch($arrSektor, "KODE_SEKTOR_INDUSTRI", $periode[0], $periode[1], 'd', "SRC_DATA_OJK");
+
+		$hasil=$this->M_data_ojk->insert_query("Tahun, Bulan, Dati1, Dati2, Nama, Subsekon_bi_digit, Subsekon_bi_nama, Kredit, Npl, Kanwil, Kode", "SRC_DATA_OJK", $arrData);
+				// for ($x=0; $x < 20000; $x++) { 
+				// 	$this->M_data_ojk->insert_queryall("Tahun, Bulan, Dati1, Dati2, Nama, Subsekon_bi_digit, Subsekon_bi_nama, Kredit, Npl, Kanwil, Kode", "SRC_DATA_OJK", $arrData);
+				// }
+
+		$this->session->set_flashdata('message', 'Data Excel berhasil diupload.');
+			return redirect('../DataOJK');
+		} else{
+			$this->session->set_flashdata('message', 'Data Excel belum diupload.');
+			return redirect('../DataOJK');
+		}
+	}
+}
