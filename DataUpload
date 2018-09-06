@@ -1,26 +1,23 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
-include_once (dirname(__FILE__) . "/Main_dashboard.php");
 
-class DataOjk extends Main_dashboard {
+class DataUpload extends CI_Controller {
 	function __construct()
 	{
 		parent::__construct();
 		$this->load->library('session');
 		$this->load->helper('form');
-		// $this->load->model('M_model_center');
-		$this->load->model('M_data_ojk');
+		$this->load->model('M_data_Upload');
 	}
 
 	public function index(){
 		// redirect('PasarSasaran/Menkor');
 		if(!empty($this->session->userdata('username'))){
-			$data					= $this->load_dashboard();
-			$data['content_url']	= 'data_ojk/index';
-			$data['css_plugin'] 	= 'data_ojk/css_index';
-			$data['js_plugin'] 		= 'data_ojk/js_index';
-			$data['upload_konten'] 	= $this->M_data_ojk->show("SRC_DATA_OJK");
-			// echo "<pre>";print_r(scandir("assets/uploads/src_pdf_file"));echo "</pre>";exit();
+			
+			$data['content_url']	= 'data_upload/index';
+			$data['css_plugin'] 	= 'data_upload/css_index';
+			$data['js_plugin'] 	= 'data_upload/js_index';
+			$data['upload_data'] 	= $this->M_data_Upload->show("SRC_DATA_UPLOAD");
 			$this->load_template($data);
 		}else{
 			redirect('login');
@@ -28,7 +25,7 @@ class DataOjk extends Main_dashboard {
 	}
 
 
-	public function uploadDataOjk(){
+	public function uploadData(){
 		
 		$file 		= $_FILES["upload"]["tmp_name"];
 		$periode 	= explode("/", $_POST["periode"]); //DIVIDE PERIODE INTO MONTH AND YEAR
@@ -58,22 +55,19 @@ class DataOjk extends Main_dashboard {
 					
 				$col = "(".$tahun.", ".$bulan.", ".$dati1.", ".$dati2.", '".$nama."', '".$subsekon_bi_digit."','".$subsekon_bi_nama."',".$kredit.",".$npl.",'".$kanwil."',".$kode444.")";
 					array_push($arrData, $col);
-					array_push($arrSektor, $tahun);
+					
 				}
 			}
 
-		$this->M_data_ojk->delete_batch($arrSektor, "KODE_SEKTOR_INDUSTRI", $periode[0], $periode[1], 'd', "SRC_DATA_OJK");
+		$this->M_data_ojk->delete_batch($periode[0], $periode[1], "SRC_DATA_UPLOAD");
 
-		$hasil=$this->M_data_ojk->insert_query("Tahun, Bulan, Dati1, Dati2, Nama, Subsekon_bi_digit, Subsekon_bi_nama, Kredit, Npl, Kanwil, Kode", "SRC_DATA_OJK", $arrData);
-				// for ($x=0; $x < 20000; $x++) { 
-				// 	$this->M_data_ojk->insert_queryall("Tahun, Bulan, Dati1, Dati2, Nama, Subsekon_bi_digit, Subsekon_bi_nama, Kredit, Npl, Kanwil, Kode", "SRC_DATA_OJK", $arrData);
-				// }
-
+		$hasil=$this->M_data_Upload->insert_query("Tahun, Bulan, Dati1, Dati2, Nama, Subsekon_bi_digit, Subsekon_bi_nama, Kredit, Npl, Kanwil, Kode", "SRC_DATA_OJK", $arrData);
+				
 		$this->session->set_flashdata('message', 'Data Excel berhasil diupload.');
-			return redirect('../DataOJK');
+			return redirect('../DataUpload');
 		} else{
 			$this->session->set_flashdata('message', 'Data Excel belum diupload.');
-			return redirect('../DataOJK');
+			return redirect('../DataUpload');
 		}
 	}
 }
