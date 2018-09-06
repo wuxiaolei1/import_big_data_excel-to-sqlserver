@@ -109,7 +109,7 @@ var myTable =
             "order": [], 
             
             "ajax": {
-                "url": "<?php echo site_url('DataOjk/get_data')?>",
+                "url": "<?php echo site_url('DataUpload/get_data')?>",
                 "type": "POST"
             },
 
